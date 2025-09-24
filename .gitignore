@@ -1,0 +1,9 @@
+data
+runs
+videos
+models
+
+.venv
+.history
+__pycache__
+.python-version
