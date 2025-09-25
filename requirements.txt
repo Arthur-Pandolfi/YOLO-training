@@ -2,9 +2,7 @@ onnx
 torch
 yt-dlp
 Pillow
-moviepy
 ultralytics
 onnxruntime
 torch-vision
 pynetworktables
-onnxruntime-gpu
