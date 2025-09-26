@@ -31,8 +31,8 @@ class Calcs:
         :return: the height fov in radians or degrees
         """
 
-        h = h/2
-        fov = 2 * math.atan(h/d)
+        h = h / 2
+        fov = 2 * math.atan( h / d )
 
         return fov if get_radians else math.degrees(fov)
     
@@ -48,8 +48,8 @@ class Calcs:
         :return: the width fov in radians or degrees
         """
 
-        w = w/2
-        fov = 2 * math.atan(w/d)
+        w = w / 2
+        fov = 2 * math.atan( w / d )
 
         return fov if get_radians else math.degrees(fov)
 

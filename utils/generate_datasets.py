@@ -106,16 +106,32 @@ class Videos:
 
 class Generate:
     def __init__(self, model_path: StrOrBytesPath, videos_extension: str = ".mp4", images_extension: str = ".jpg",):
+        """
+        The class used to help generate datasets to train a YOLO model
+
+        Atributes
+        ---------
+        model_path : StrOrBytesPath
+            The path where the model are located
+        videos_extension: str
+            The extension for the videos (default .mp4)
+        images_extensions : str
+            The extension for the images (default .jpg)
+        """
+        
         self.model = YOLO(model_path)
         self.videos_extension = videos_extension
         self.images_extensions = images_extension
 
     def convert_videos(self, videos_path: Union[StrOrBytesPath, list[StrOrBytesPath]], delete: bool = False):
         """
-        Convert all videos to the specified extensions in the class creation
+        Convert all videos on a path to the specified extension in the class creation
 
         Suported formats:
         .mp4, .mov, .avi, .mkv, .flw, .webm, .wmv
+        
+        :param videos_path: The path where the images are located or a list containing multiple paths
+        :param delete: Delete the images after be converted
         """
 
         CODECS = {
@@ -157,14 +173,13 @@ class Generate:
                 if delete:
                     os.remove(videos_path + "/" + video)
                 
-    def convert_images(self, images_path: Union[str, list[str]], delete:bool = False):
+    def convert_images(self, images_path: Union[str, list[str]], delete: bool = False):
         """
-        Convert all images to the specified extensions in the class creation
+        Convert all images on a path to the specified extension in the class creation
+
+        :param images_path: The path where the images are located or a list containing multiple paths
+        :param delete: Delete the images after be converted
         """
-        # IMAGE_PATH = "C:\\Users\\Arthur\\source\\repos\\FRC-Programas\\object-detection\\build-season-volley-project\\images.jpeg"
-        # OUTPUT_PATH = "C:\\Users\\Arthur\\source\\repos\\FRC-Programas\\object-detection\\build-season-volley-project\\images.png"
-        # img = Image.open(IMAGE_PATH)
-        # img.save(OUTPUT_PATH, "PNG")
 
         if type(images_path) == list:
             for image_path in images_path:
@@ -201,13 +216,12 @@ class Generate:
                 if delete:
                     os.remove(current_image_path)
 
-    def extract_frames_with_pause(self, videos_path: StrOrBytesPath, start_counter=0):
+    def extract_frames_with_delay(self, videos_path: StrOrBytesPath, start_counter=0):
         """
-        Separete the frames of a video with a pause
+        Separete the frames of a video with a delay
 
-        Args:
-        - videos_path: the path containing the videos to separete the frames
-        - start_counter: the start of counter of videos name
+        :param videos_path: the path containing the videos to separete the frames
+        :param start_counter: the start of counter of videos name
         """
         
         videos = os.listdir(videos_path)
@@ -265,10 +279,9 @@ class Generate:
 
     def extract_frames_consecutive(self, videos_path: str):
         """
-        Separete the frames of a video in a consecutive form
+        Separete all the frames of a video
 
-        Args:
-        - videos_path: the path containing the videos to separete the frames
+        :param videos_path: the path containing the videos to separete the frames
         """
         
         videos = os.listdir(videos_path)
@@ -322,7 +335,14 @@ class Generate:
 
         os.system(CLEAR_COMMAND)
     
-    def move_images(self, images_path: Union[str, list[str]], path_to_save:str):
+    def move_images(self, images_path: Union[str, list[str]], path_to_save: str):
+        """
+        Move images of a path to another
+
+        :param images_path: The path of the images, or a list including multiple paths
+        :param path_to_save: THe path that the images will be saved
+        """
+        
         images_path_type = type(images_path)
 
         if not os.path.exists(path_to_save):
@@ -359,7 +379,10 @@ class Generate:
 
     def generate_noise_in_images(self, images_path: StrOrBytesPath, path_to_save= ""):
         """
-        Fill blank the path_to_save to save in the same path of the images
+        Used to generate noises in images
+
+        :param images_path: The path where the images is located
+        :param path_to_save: The path where the images that will be saved (fill blank to save in the same path of the images)
         """
 
         if path_to_save == "":
@@ -398,12 +421,27 @@ class Generate:
             cv2.imwrite(path_to_save + '/' + image.removesuffix(self.images_extensions) + '-blurred' + self.images_extensions, blurred)
             cv2.imwrite(path_to_save + '/' + image.removesuffix(self.images_extensions) + '-noisy' + self.images_extensions, noisy_img)
 
-            cv2.imwrite(path_to_save + '/' + image.removesuffix(self.images_extensions) + '-sharp-img1' + self.images_extensions, sharp_img_kernel1)
-            cv2.imwrite(path_to_save + '/' + image.removesuffix(self.images_extensions) + '-low-quality1' + self.images_extensions, low_quality1, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
+            cv2.imwrite(path_to_save + '/' + image.removesuffix(self.images_extensions) + '-sharp-img' + self.images_extensions, sharp_img_kernel1)
+
+            if self.images_extensions == ".jpg":
+                cv2.imwrite(path_to_save + '/' + image.removesuffix(self.images_extensions) + '-low-quality' + self.images_extensions, low_quality1, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
+            else:
+                cv2.imwrite(path_to_save + '/' + image.removesuffix(self.images_extensions) + '-low-quality' + self.images_extensions, low_quality1)                
         os.system(CLEAR_COMMAND)
 
-    def extract_labels(self, images_path: StrOrBytesPath, identified_images_path:str,
+    def extract_labels(self, images_path: StrOrBytesPath, identified_images_path: str,
                        labels_path: StrOrBytesPath, min_conf: float = 0.6, view_detection: bool = False):
+        """
+        Used to extract the labels of a image
+
+        :param images_path: The path where the images are located
+        :param identified_images_path: The path where the images with a detected object that will be saved
+        :param labels_path: The path where the labels will be saved
+        :param min_conf: The minimum confiance of the detected object to be saved
+        :param view_detection: If you want to view the images while the images is being extracted 
+        (if True, press "Y" to save the label)
+        """
+
         IMAGES = os.listdir(images_path)
         RECTANGLE_COLOR = (0, 255, 0)
         RECTANGLE_THICKNESS = 4

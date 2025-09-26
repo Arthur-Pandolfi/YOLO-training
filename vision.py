@@ -1,5 +1,6 @@
 import os
 import cv2
+from time import sleep
 from typing import Union
 from utils import get_infos
 from ultralytics import YOLO
@@ -132,6 +133,7 @@ class Vision:
         """
         The main function that runs the principal code
         """
+
         model = YOLO(self.MODEL_PATH, task=model_task)
         cap = cv2.VideoCapture(self.CAMERA_INDEX)
 
@@ -143,6 +145,10 @@ class Vision:
             horizontal_fov=self.w_degrees_fov,
             camera_resolution=camera_resolution
         )
+
+        if show_image:
+            print("Press 'q' to quit")
+            sleep(5)
 
         if cap.isOpened():
             camera_resolution["x"] = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
