@@ -11,7 +11,7 @@ class Calcs:
             The horizontal (X axis) field of vision (FOV) of the camera used to detect objects
         vertical_fov : float
             The vertical (Y axis) field of vision (FOV) of the camera used to detect objects
-        camera_resolution : tuple[int, int]
+        camera_resolution : dict["x:" int, "y:" int]
             The resolution of the camera used to detect objects
         """
 
@@ -62,7 +62,7 @@ class Calcs:
         :return: horizontal displacement angle offset
         """
 
-        offset = (horizontal_pixel_offset / self.camera_resolution[0]) * self.horizontal_fov
+        offset = (horizontal_pixel_offset / self.camera_resolution["x"]) * self.horizontal_fov
         return math.radians(offset) if get_radians else offset
     
     def get_vertical_angle_offset(self, vertical_pixel_offset: float, get_radians: bool = False):
@@ -74,5 +74,5 @@ class Calcs:
         :return: vetical deslocation angle offset
         """
 
-        offset = (vertical_pixel_offset / self.camera_resolution[1]) * self.vertical_fov
+        offset = (vertical_pixel_offset / self.camera_resolution["y"]) * self.vertical_fov
         return math.radians(offset) if get_radians else offset

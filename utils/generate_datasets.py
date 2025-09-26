@@ -22,10 +22,10 @@ StrOrBytesPath = Union[str, bytes, os.PathLike[str], os.PathLike[bytes]]
 class Videos:
     def __init__(self):
         """
-        This class downloads, and manipulate videos in you filesystem
+        This class downloads, and manipulate videos in your filesystem
         """
 
-    def download_video(self, url:str):
+    def download_video(self, url: str):
         """
         Download a single video from youtube
 
