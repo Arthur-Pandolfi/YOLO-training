@@ -8,8 +8,6 @@ from cv2.typing import MatLike
 from networktables import NetworkTables
 from networktables.entry import NetworkTableEntry
 
-#ADICIONAR TV
-
 StrOrBytesPath = Union[str, bytes, os.PathLike[str], os.PathLike[bytes]]
 class Vision:
 
@@ -112,11 +110,15 @@ class Vision:
         NetworkTables.initialize(server=self.ROBORIO_IP)
         while not NetworkTables.isConnected(): pass
 
-        raspberry_table = NetworkTables.getTable("raspberry")
+        raspberry_table = os.environ.get("RASPBERRY_NAME")
+
+        raspberry_table = NetworkTables.getTable(raspberry_table)
         detections = raspberry_table.getSubTable("detections")
         locations_table = detections.getSubTable("locations")
         tx_entry = locations_table.getEntry("tx")
         ty_entry = locations_table.getEntry("ty")
+        tv_entry = locations_table.getEntry("tv")
+    
         cls_entry = locations_table.getEntry("cls")
         cls_name_entry = locations_table.getEntry("cls_name")
 
@@ -127,7 +129,7 @@ class Vision:
 
         NetworkTables.addEntryListener(self._valueChanged)
 
-        return tx_entry, ty_entry, cls_entry, cls_name_entry
+        return tx_entry, ty_entry, tv_entry, cls_entry, cls_name_entry
 
     def main(self, show_image: bool = False, model_task: str = "detect", verbose_model: bool = False):
         """
@@ -138,7 +140,7 @@ class Vision:
         cap = cv2.VideoCapture(self.CAMERA_INDEX)
 
         camera_resolution = { "x": int, "y": int }
-        tx_entry, ty_entry, cls_entry, cls_name_entry = self.initialize_network_tables()
+        tx_entry, ty_entry, tv_entry, cls_entry, cls_name_entry = self.initialize_network_tables()
 
         calcs = get_infos.Calcs(
             vertical_fov=self.h_degrees_fov,
@@ -191,6 +193,7 @@ class Vision:
                 del(boxes)
             
             if has_detection:
+                tv_entry.setBoolean(True)
                 higher_value = max(detections_conf)
                 higher_value_index = detections_conf.index(higher_value)
 
@@ -230,6 +233,7 @@ class Vision:
                     if cv2.waitKey(1) & 0xFF == ord('q'):
                             break
             else:
+                tv_entry.setBoolean(False)
                 print("No detections")
                 print()
                 if show_image:
