@@ -350,7 +350,6 @@ class Generate:
 
         if images_path_type == list:
             for path in images_path:
-                print(f"Moving image: {path + '/' + image}")
                 images = []
                 archives = os.listdir(path)
 
@@ -360,6 +359,7 @@ class Generate:
                 del(archives)
 
                 for image in images:
+                    print(f"Moving image: {path + '/' + image}")
                     shutil.move(path + '/' + image, path_to_save)
 
         else:
