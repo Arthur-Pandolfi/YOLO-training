@@ -483,7 +483,7 @@ class Generate:
                     y_center = ((y1 + y2) / 2) / h
 
                     label_name = labels_path + "/" + image.removesuffix(self.images_extensions) + ".txt"
-                    label_content = f"{cls} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f}"
+                    label_content = f"{cls} {x_center:.6f} {y_center:.6f} {width:.6f} {height:.6f}\n"
 
                     if view_detection:
                         cv2.rectangle(
@@ -500,12 +500,12 @@ class Generate:
                         if key == ord("y"):
                             print("Label extracted")
                             shutil.copy(images_path + "/" + image, identified_images_path)
-                            with open(label_name, "w+") as file:
+                            with open(label_name, "a+") as file:
                                 file.write(label_content)
                             cv2.destroyAllWindows()
                     else:
                         shutil.copy(images_path + "/" + image, identified_images_path)
-                        with open(label_name, "w+") as file:
+                        with open(label_name, "a+") as file:
                             file.write(label_content)
 
 
