@@ -33,7 +33,7 @@ pyenv install 3.11.9
 pyenv local 3.11.9
 ```
 
-(optional, but extremelly recomendend) download FFMPEG 
+(optional, but extremely recommended) download FFMPEG 
 <details>
   <summary>Windows</summary>
   Step 1: Download the FFMPEG build from the official website https://www.ffmpeg.org/download.html#build-windows
@@ -46,8 +46,8 @@ pyenv local 3.11.9
 
   Step 3: Add this to your environment variable
   1. Press the Windows Logo button and type "environment variables", and then press enter
-  2. Click at the "Environment Varaibles..." button
-  3. Double click at the "Path" varaible, click "New" and put the path to your FFPMEG binary directory (C:/users/%USERNAME%/ffmpeg/bin)
+  2. Click at the "Environment Variables..." button
+  3. Double click at the "Path" variable, click "New" and put the path to your FFPMEG binary directory (C:/users/%USERNAME%/ffmpeg/bin)
 </details>
 
 <details>
