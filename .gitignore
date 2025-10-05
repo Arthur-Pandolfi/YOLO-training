@@ -3,6 +3,8 @@ runs
 videos
 models
 
+annotations.txt
+
 .venv
 .history
 __pycache__
