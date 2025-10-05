@@ -6,4 +6,3 @@ models
 .venv
 .history
 __pycache__
-.python-version
