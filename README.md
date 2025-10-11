@@ -144,7 +144,7 @@ python vision.py
 - **NetworkTables:** Set `ROBORIO_IP` and `RASPBERRY_NAME` as needed environment variables for your FRC setup.
 
 ## Example:
-See the [example.py](example.py) file for a full example of how to use this
+See examples at the folder [examples](examples) file for a full example of how to use this
 
 ## License
 

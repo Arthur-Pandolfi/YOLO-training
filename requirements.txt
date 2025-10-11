@@ -1,7 +1,10 @@
+flask
 onnx
 torch
+gevent
 yt-dlp
 Pillow
+aiohttp
 ultralytics
 onnxruntime
 torch-vision

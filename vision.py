@@ -1,12 +1,16 @@
 import os
 import cv2
+import time
 from time import sleep
 from typing import Union
 from utils import get_infos
 from ultralytics import YOLO
 from cv2.typing import MatLike
+from gevent.pywsgi import WSGIServer
 from networktables import NetworkTables
-from networktables.entry import NetworkTableEntry
+from multiprocessing import Process
+from networktables import NetworkTableEntry
+from flask import Flask, Response, redirect, url_for
 
 StrOrBytesPath = Union[str, bytes, os.PathLike[str], os.PathLike[bytes]]
 class Vision:
@@ -31,10 +35,11 @@ class Vision:
             The RoboRIO IP or hostname (roborio-TEAM-frc.local)
         """
 
+        self.cap = cv2.VideoCapture(camera_index)
+
         self.min_conf = 0
         self.ROBORIO_IP = roborio_ip
         self.MODEL_PATH = model_path
-        self.CAMERA_INDEX = camera_index
         self.CAMERA_RESOLUTION = {}
 
         self.cam_x, cam_y = 0, 0
@@ -110,7 +115,7 @@ class Vision:
         NetworkTables.initialize(server=self.ROBORIO_IP)
         while not NetworkTables.isConnected(): pass
 
-        raspberry_table = os.environ.get("RASPBERRY_NAME")
+        raspberry_table = 'os.environ.get("RASPBERRY_NAME")'
 
         raspberry_table = NetworkTables.getTable(raspberry_table)
         detections = raspberry_table.getSubTable("detections")
@@ -130,6 +135,19 @@ class Vision:
         NetworkTables.addEntryListener(self._valueChanged)
 
         return tx_entry, ty_entry, tv_entry, cls_entry, cls_name_entry
+    
+    def generate_frames(self):
+        while True:
+            success, frame = self.cap.read()
+            if not success:
+                break
+            else:
+                frame = cv2.resize(frame, (320, 240))
+                ret, buffer = cv2.imencode('.jpg', frame)
+                frame = buffer.tobytes()
+                yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        time.sleep(1/15) # make this 15fps
 
     def main(self, show_image: bool = False, model_task: str = "detect", verbose_model: bool = False):
         """
@@ -137,7 +155,7 @@ class Vision:
         """
 
         model = YOLO(self.MODEL_PATH, task=model_task)
-        cap = cv2.VideoCapture(self.CAMERA_INDEX)
+        self.cap = cv2.VideoCapture(self.CAMERA_INDEX)
 
         camera_resolution = { "x": int, "y": int }
         tx_entry, ty_entry, tv_entry, cls_entry, cls_name_entry = self.initialize_network_tables()
@@ -152,16 +170,16 @@ class Vision:
             print("Press 'q' to quit")
             sleep(5)
 
-        if cap.isOpened():
-            camera_resolution["x"] = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            camera_resolution["y"] = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        if self.cap.isOpened():
+            camera_resolution["x"] = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            camera_resolution["y"] = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
             self.cam_x, self.cam_y = int(camera_resolution["x"] // 2), int(camera_resolution["y"] // 2)
         else:
             exit(f"Cannot open the cmaera at the index {self.CAMERA_INDEX}")
 
-        while cap.isOpened():
-            ret, frame = cap.read()
+        while self.cap.isOpened():
+            ret, frame = self.cap.read()
             results = model(source=frame, verbose=verbose_model)
 
             if not ret:
@@ -242,11 +260,36 @@ class Vision:
                 if cv2.waitKey(1) & 0x0FF == ord('q'):
                         break
 
-        cap.release()
+        self.cap.release()
         cv2.destroyAllWindows()
 
 h = 1
 w = 2
 d = 2.25
 
-Vision(h, w, d, model_path="./models/train3-INT8.onnx").main(True)
+vision = Vision(h, w, d, model_path="models/main.onnx")
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return redirect(url_for('video_feed'))
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(vision.generate_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def run_flask():
+    http_server = WSGIServer(('0.0.0.0', 5000), app)
+    http_server.serve_forever()
+
+if __name__ == "__main__":
+    p1 = Process(target=run_flask)
+    p2 = Process(target=vision.main)
+
+    p1.start()
+    p2.start()
+
+    p1.join()
+    p2.join()
